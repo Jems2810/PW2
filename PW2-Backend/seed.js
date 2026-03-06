@@ -42,7 +42,7 @@ const seedDB = async () => {
     // ============================
     const admin = await User.create({
       nombre: 'Administrador',
-      email: 'admin@connectel.com',
+      email: 'admin@movilstore.com',
       password: 'Admin123!',
       telefono: '614-123-4567',
       rol: 'admin'
@@ -443,8 +443,8 @@ const seedDB = async () => {
     // 11. CONFIGURACIÓN
     // ============================
     await Setting.insertMany([
-      { clave: 'nombre_tienda', valor: 'Connectel', tipo: 'string', descripcion: 'Nombre de la tienda' },
-      { clave: 'email_contacto', valor: 'contacto@connectel.com', tipo: 'string', descripcion: 'Email de contacto' },
+      { clave: 'nombre_tienda', valor: 'MovilStore', tipo: 'string', descripcion: 'Nombre de la tienda' },
+      { clave: 'email_contacto', valor: 'contacto@movilstore.com', tipo: 'string', descripcion: 'Email de contacto' },
       { clave: 'telefono', valor: '+52 614 123 4567', tipo: 'string', descripcion: 'Teléfono de atención' },
       { clave: 'envio_gratis_minimo', valor: '5000', tipo: 'number', descripcion: 'Mínimo para envío gratis' },
       { clave: 'costo_envio', valor: '150', tipo: 'number', descripcion: 'Costo de envío estándar' },
@@ -457,7 +457,7 @@ const seedDB = async () => {
     console.log('\n========================================');
     console.log('✅ BASE DE DATOS POBLADA CORRECTAMENTE');
     console.log('========================================');
-    console.log('👤 Admin: admin@connectel.com / Admin123!');
+    console.log('👤 Admin: admin@movilstore.com / Admin123!');
     console.log('👤 Cliente: juan@gmail.com / Cliente123!');
     console.log('👤 Cliente: maria@gmail.com / Cliente123!');
     console.log('========================================\n');

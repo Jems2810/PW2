@@ -29,7 +29,7 @@ app.use('/api/settings', require('./routes/settings'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-  res.json({ message: 'API Connectel funcionando correctamente' });
+  res.json({ message: 'API MovilStore funcionando correctamente' });
 });
 
 const PORT = process.env.PORT || 5000;

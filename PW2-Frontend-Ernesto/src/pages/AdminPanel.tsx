@@ -135,7 +135,7 @@ const AdminPanel: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'admin@connectel.com',
+          email: 'admin@movilstore.com',
           password: 'Admin123!'
         })
       });
@@ -179,7 +179,7 @@ const AdminPanel: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'admin@connectel.com',
+          email: 'admin@movilstore.com',
           password: 'Admin123!'
         })
       });
