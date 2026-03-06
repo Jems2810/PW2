@@ -48,16 +48,6 @@ Colecciones principales:
 - MongoDB local ejecutandose en `mongodb://localhost:27017`
 - Git
 
-## Variables de entorno del backend
-
-Crear el archivo `PW2-Backend/.env` con base en `PW2-Backend/.env.example`:
-
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/PW2
-JWT_SECRET=tu_clave_secreta
-```
-
 ## Instalacion
 
 ### Frontend
@@ -152,7 +142,3 @@ En esa pantalla se muestran datos en tiempo real obtenidos desde MongoDB por med
 - Admin: `admin@movilstore.com` / `Admin123!`
 - Cliente: `juan@gmail.com` / `Cliente123!`
 - Cliente: `maria@gmail.com` / `Cliente123!`
-
-## Autor
-
-Proyecto academico para Programacion Web 2.
