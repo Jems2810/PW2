@@ -1,12 +1,12 @@
 # PW2
 
-Proyecto de Programacion Web 2: tienda de celulares "MovilStore / Connectel" con frontend en React + Vite y backend en Node.js + Express conectado a MongoDB.
+Proyecto de Programacion Web 2: tienda de celulares "MovilStore" con frontend en React + Vite y backend en Node.js + Express conectado a MongoDB.
 
 ## Estructura del proyecto
 
 ```text
 PW2/
-├── PW2-Frontend-Ernesto/
+├── PW2-Frontend/
 └── PW2-Backend/
 ```
 
@@ -63,7 +63,7 @@ JWT_SECRET=tu_clave_secreta
 ### Frontend
 
 ```bash
-cd PW2-Frontend-Ernesto
+cd PW2-Frontend
 npm install
 ```
 
@@ -93,7 +93,7 @@ MongoDB Conectado: localhost
 ### 2. Ejecutar frontend
 
 ```bash
-cd PW2-Frontend-Ernesto
+cd PW2-Frontend
 npm run dev
 ```
 
@@ -149,7 +149,7 @@ En esa pantalla se muestran datos en tiempo real obtenidos desde MongoDB por med
 
 ## Credenciales de prueba
 
-- Admin: `admin@connectel.com` / `Admin123!`
+- Admin: `admin@movilstore.com` / `Admin123!`
 - Cliente: `juan@gmail.com` / `Cliente123!`
 - Cliente: `maria@gmail.com` / `Cliente123!`
 
