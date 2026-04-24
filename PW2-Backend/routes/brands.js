@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const Brand = require('../models/Brand');
-const { protect, admin } = require('../middleware/auth');
+const { optionalProtect, protect, admin } = require('../middleware/auth');
 
 // @route   GET /api/brands
 // @desc    Obtener todas las marcas
 // @access  Public
-router.get('/', async (req, res) => {
+router.get('/', optionalProtect, async (req, res) => {
   try {
-    const brands = await Brand.find({ activo: true }).sort({ nombre: 1 });
+    const includeInactive = req.query.includeInactive === 'true' && req.user?.rol === 'admin';
+    const brands = await Brand.find(includeInactive ? {} : { activo: true }).sort({ nombre: 1 });
     res.json(brands);
   } catch (error) {
     res.status(500).json({ message: 'Error del servidor', error: error.message });

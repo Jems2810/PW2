@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../models/Category');
-const { protect, admin } = require('../middleware/auth');
+const { optionalProtect, protect, admin } = require('../middleware/auth');
 
 // @route   GET /api/categories
 // @desc    Obtener todas las categorías
 // @access  Public
-router.get('/', async (req, res) => {
+router.get('/', optionalProtect, async (req, res) => {
   try {
-    const categories = await Category.find({ activo: true }).sort({ nombre: 1 });
+    const includeInactive = req.query.includeInactive === 'true' && req.user?.rol === 'admin';
+    const categories = await Category.find(includeInactive ? {} : { activo: true }).sort({ nombre: 1 });
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Error del servidor', error: error.message });

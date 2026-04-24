@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
-const { protect, admin } = require('../middleware/auth');
+const { optionalProtect, protect, admin } = require('../middleware/auth');
 
 // @route   GET /api/products
 // @desc    Obtener todos los productos
 // @access  Public
-router.get('/', async (req, res) => {
+router.get('/', optionalProtect, async (req, res) => {
   try {
-    const { marca, minPrecio, maxPrecio, busqueda, destacado, ordenar } = req.query;
+    const { marca, minPrecio, maxPrecio, busqueda, destacado, ordenar, includeInactive } = req.query;
+    const canIncludeInactive = includeInactive === 'true' && req.user?.rol === 'admin';
     
-    let query = { activo: true };
+    let query = canIncludeInactive ? {} : { activo: true };
 
     // Filtro por marca
     if (marca) {

@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema({
   marca: {
     type: String,
     required: [true, 'La marca es requerida'],
-    enum: ['Apple', 'Samsung', 'Huawei', 'Xiaomi', 'Google', 'Motorola', 'Oppo', 'LG', 'Honor', 'ZTE']
+    trim: true
   },
   modelo: {
     type: String,
