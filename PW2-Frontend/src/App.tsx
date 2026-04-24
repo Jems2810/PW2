@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import CartPage from './pages/CartPage';
 import ContactPage from './pages/ContactPage';
 import AdminPanel from './pages/AdminPanel';
+import CatalogPage from './pages/CatalogPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -19,6 +20,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/admin" element={<AdminPanel />} />
           </Routes>
