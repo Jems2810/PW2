@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SiMotorola, SiOppo } from 'react-icons/si';
 
 const brands = [
