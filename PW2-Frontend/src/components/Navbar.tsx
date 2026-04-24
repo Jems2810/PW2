@@ -52,9 +52,9 @@ const Navbar: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-1">
             {[
               { name: 'Inicio', to: '/', active: true },
-              { name: 'Catálogo', to: '#' },
-              { name: 'Ofertas', to: '#', highlight: true },
-              { name: 'Servicios', to: '#' },
+              { name: 'Catálogo', to: '/catalog' },
+              { name: 'Ofertas', to: '/offers', highlight: true },
+              { name: 'Servicios', to: '/services' },
               { name: 'Contacto', to: '/contact' },
             ].map((item) => (
               <Link
