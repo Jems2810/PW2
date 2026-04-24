@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
+import type { CartItemId } from '../context/CartContext';
 import { 
   Add, 
   Remove, 
@@ -19,7 +20,7 @@ const ShoppingCart: React.FC = () => {
     }).format(price);
   };
 
-  const handleQuantityChange = (id: number, newQuantity: number) => {
+  const handleQuantityChange = (id: CartItemId, newQuantity: number) => {
     if (newQuantity >= 1) {
       updateQuantity(id, newQuantity);
     }

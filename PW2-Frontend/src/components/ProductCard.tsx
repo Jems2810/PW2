@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { useCart } from '../context/CartContext';
+import type { CartItemId } from '../context/CartContext';
+import { PRODUCT_PLACEHOLDER, resolveProductImage } from '../lib/catalog';
 
 interface ProductCardProps {
-  id: number;
+  id: CartItemId;
   name: string;
   price: number;
   image: string;
@@ -15,7 +17,12 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [imageSrc, setImageSrc] = useState(() => resolveProductImage(image));
   const { addItem } = useCart();
+
+  useEffect(() => {
+    setImageSrc(resolveProductImage(image));
+  }, [image]);
   
   const discount = Math.floor(Math.random() * 30) + 10;
   const originalPrice = Math.floor(price * (1 + discount / 100));
@@ -64,8 +71,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image }) => 
         </div>
 
         <img 
-          src={image} 
+          src={imageSrc} 
           alt={name} 
+          onError={() => setImageSrc(PRODUCT_PLACEHOLDER)}
           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
         />
       </div>

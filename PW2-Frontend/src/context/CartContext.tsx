@@ -2,8 +2,10 @@ import React, { createContext, useContext, useReducer } from 'react';
 import type { ReactNode } from 'react';
 
 // Tipos para el carrito
+export type CartItemId = number | string;
+
 export interface CartItem {
-  id: number;
+  id: CartItemId;
   name: string;
   price: number;
   originalPrice?: number;
@@ -21,15 +23,15 @@ interface CartState {
 
 type CartAction =
   | { type: 'ADD_ITEM'; payload: Omit<CartItem, 'quantity'> }
-  | { type: 'REMOVE_ITEM'; payload: number }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
+  | { type: 'REMOVE_ITEM'; payload: CartItemId }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: CartItemId; quantity: number } }
   | { type: 'CLEAR_CART' };
 
 interface CartContextType {
   state: CartState;
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: CartItemId) => void;
+  updateQuantity: (id: CartItemId, quantity: number) => void;
   clearCart: () => void;
 }
 
@@ -129,11 +131,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'ADD_ITEM', payload: item });
   };
 
-  const removeItem = (id: number) => {
+  const removeItem = (id: CartItemId) => {
     dispatch({ type: 'REMOVE_ITEM', payload: id });
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: CartItemId, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
   };
 
