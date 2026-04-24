@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Iconos de Material UI
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -11,9 +11,15 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import LoginIcon from '@mui/icons-material/Login';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { useAuth } from '../context/AuthContext';
 
 const LoginForm: React.FC = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -28,9 +34,32 @@ const LoginForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    setSubmitting(true);
+    setFeedback(null);
+
+    try {
+      const user = await login({
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe
+      });
+
+      setFeedback({
+        type: 'success',
+        text: user.rol === 'admin' ? 'Sesión iniciada. Ya puedes entrar al panel de administración desde Inicio.' : 'Sesión iniciada correctamente.'
+      });
+
+      navigate('/');
+    } catch (error) {
+      setFeedback({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'No se pudo iniciar sesión'
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -57,6 +86,12 @@ const LoginForm: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Iniciar Sesión</h1>
             <p className="text-gray-500">Accede a tu cuenta para continuar</p>
           </div>
+
+          {feedback ? (
+            <div className={`rounded-2xl border px-4 py-3 text-sm font-medium ${feedback.type === 'success' ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+              {feedback.text}
+            </div>
+          ) : null}
 
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -138,10 +173,11 @@ const LoginForm: React.FC = () => {
             {/* Botón de inicio de sesión */}
             <button
               type="submit"
-              className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 flex items-center justify-center space-x-2"
+              className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 flex items-center justify-center space-x-2 disabled:cursor-not-allowed disabled:bg-primary-300 disabled:shadow-none"
+              disabled={submitting}
             >
-              <LoginIcon fontSize="small" />
-              <span>Iniciar Sesión</span>
+              {submitting ? <AdminPanelSettingsIcon fontSize="small" /> : <LoginIcon fontSize="small" />}
+              <span>{submitting ? 'Validando acceso...' : 'Iniciar Sesión'}</span>
             </button>
           </form>
 

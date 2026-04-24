@@ -1,10 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import EastIcon from '@mui/icons-material/East';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { useAuth } from '../context/AuthContext';
 
 const HeroSection: React.FC = () => {
+  const { isAdmin } = useAuth();
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-primary-50 via-white to-amber-50 overflow-hidden">
       {/* Elementos decorativos de fondo */}
@@ -50,6 +55,16 @@ const HeroSection: React.FC = () => {
                 <span className="text-amber-500">🔥</span>
                 Ver ofertas
               </button>
+
+              {isAdmin ? (
+                <Link
+                  to="/admin"
+                  className="flex items-center justify-center gap-3 px-8 py-4 bg-violet-600 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-violet-600/25 hover:bg-violet-700 transition-all duration-300"
+                >
+                  <AdminPanelSettingsIcon fontSize="small" />
+                  Ir al panel admin
+                </Link>
+              ) : null}
             </div>
 
             {/* Características */}

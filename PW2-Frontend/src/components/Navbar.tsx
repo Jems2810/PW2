@@ -4,14 +4,18 @@ import { Link } from 'react-router-dom';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import LogoutIcon from '@mui/icons-material/Logout';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { state } = useCart();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,6 +79,20 @@ const Navbar: React.FC = () => {
 
           {/* Acciones */}
           <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <Link
+                to="/admin"
+                className={`hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 lg:inline-flex ${
+                  isScrolled
+                    ? 'bg-violet-50 text-violet-700 hover:bg-violet-100'
+                    : 'bg-white/70 text-violet-700 hover:bg-white'
+                }`}
+              >
+                <AdminPanelSettingsIcon fontSize="small" />
+                Administración
+              </Link>
+            ) : null}
+
             {/* Búsqueda expandible */}
             <div className={`flex items-center transition-all duration-300 ${searchOpen ? 'w-48' : 'w-10'}`}>
               {searchOpen && (
@@ -99,17 +117,30 @@ const Navbar: React.FC = () => {
               </button>
             </div>
 
-            {/* Usuario */}
-            <Link 
-              to="/login" 
-              className={`p-2.5 rounded-full transition-all duration-300 ${
-                isScrolled 
-                  ? 'hover:bg-primary-50 text-gray-600 hover:text-primary-600' 
-                  : 'hover:bg-white/30 text-gray-700'
-              }`}
-            >
-              <PersonOutlineIcon fontSize="small" />
-            </Link>
+            {isAuthenticated ? (
+              <button
+                onClick={logout}
+                className={`p-2.5 rounded-full transition-all duration-300 ${
+                  isScrolled
+                    ? 'hover:bg-red-50 text-gray-600 hover:text-red-600'
+                    : 'hover:bg-white/30 text-gray-700'
+                }`}
+                title="Cerrar sesión"
+              >
+                <LogoutIcon fontSize="small" />
+              </button>
+            ) : (
+              <Link 
+                to="/login" 
+                className={`p-2.5 rounded-full transition-all duration-300 ${
+                  isScrolled 
+                    ? 'hover:bg-primary-50 text-gray-600 hover:text-primary-600' 
+                    : 'hover:bg-white/30 text-gray-700'
+                }`}
+              >
+                <PersonOutlineIcon fontSize="small" />
+              </Link>
+            )}
 
             {/* Carrito */}
             <Link 
