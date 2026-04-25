@@ -18,7 +18,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = 'http://localhost:5000/api';
-
 type AdminSection = 'dashboard' | 'products' | 'brands' | 'orders';
 
 interface Product {
