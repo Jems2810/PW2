@@ -4,6 +4,24 @@ const Review = require('../models/Review');
 const Product = require('../models/Product');
 const { protect, admin } = require('../middleware/auth');
 
+// @route   GET /api/reviews
+// @desc    Listar todas las reseñas (admin), con filtro opcional por aprobado
+// @access  Private/Admin
+router.get('/', protect, admin, async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.aprobado === 'true') filter.aprobado = true;
+    if (req.query.aprobado === 'false') filter.aprobado = false;
+    const reviews = await Review.find(filter)
+      .populate('usuario', 'nombre email')
+      .populate('producto', 'nombre imagen')
+      .sort({ createdAt: -1 });
+    res.json(reviews);
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+});
+
 // @route   GET /api/reviews/product/:productId
 // @desc    Obtener reseñas de un producto
 // @access  Public

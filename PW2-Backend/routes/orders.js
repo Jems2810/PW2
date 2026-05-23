@@ -16,12 +16,14 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ message: 'No hay productos en la orden' });
     }
 
-    // Calcular totales
+    // Usar el precio que envió el cliente (ya puede ser precio de oferta)
+    // No se recalcula desde la BD para respetar el precio de compra real
     let subtotal = 0;
     for (const item of productos) {
-      const product = await Product.findById(item.producto);
-      if (product) {
-        subtotal += product.precio * item.cantidad;
+      const itemPrice = Number(item.precio);
+      const itemQty = Number(item.cantidad);
+      if (Number.isFinite(itemPrice) && Number.isFinite(itemQty)) {
+        subtotal += itemPrice * itemQty;
       }
     }
 
@@ -145,6 +147,56 @@ router.get('/', protect, admin, async (req, res) => {
       .populate('usuario', 'nombre email')
       .sort({ createdAt: -1 });
     res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+});
+
+// @route   PUT /api/orders/:id/recalculate
+// @desc    Recalcular subtotal/impuestos/total a partir de los items guardados (admin)
+// @access  Private/Admin
+router.put('/:id/recalculate', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Orden no encontrada' });
+    }
+
+    let subtotal = 0;
+    for (const item of order.productos) {
+      const itemPrice = Number(item.precio);
+      const itemQty = Number(item.cantidad);
+      if (Number.isFinite(itemPrice) && Number.isFinite(itemQty)) {
+        subtotal += itemPrice * itemQty;
+      }
+    }
+
+    const costoEnvio = subtotal > 5000 ? 0 : 150;
+    const impuestos = subtotal * 0.16;
+    const total = subtotal + costoEnvio + impuestos;
+
+    order.subtotal = subtotal;
+    order.costoEnvio = costoEnvio;
+    order.impuestos = impuestos;
+    order.total = total;
+
+    const updated = await order.save();
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+});
+
+// @route   DELETE /api/orders/:id
+// @desc    Eliminar pedido (admin)
+// @access  Private/Admin
+router.delete('/:id', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Orden no encontrada' });
+    }
+    res.json({ message: 'Pedido eliminado' });
   } catch (error) {
     res.status(500).json({ message: 'Error del servidor', error: error.message });
   }

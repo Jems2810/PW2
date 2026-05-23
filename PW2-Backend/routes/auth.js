@@ -18,6 +18,19 @@ router.post('/register', async (req, res) => {
   try {
     const { nombre, email, password, telefono } = req.body;
 
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ message: 'Nombre, email y contraseña son obligatorios' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'El formato del email no es válido' });
+    }
+
+    if (typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+
     // Verificar si el usuario ya existe
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -93,26 +106,60 @@ router.put('/profile', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    if (user) {
-      user.nombre = req.body.nombre || user.nombre;
-      user.email = req.body.email || user.email;
-      user.telefono = req.body.telefono || user.telefono;
-      user.direccion = req.body.direccion || user.direccion;
-
-      if (req.body.password) {
-        user.password = req.body.password;
-      }
-
-      const updatedUser = await user.save();
-
-      res.json({
-        _id: updatedUser._id,
-        nombre: updatedUser.nombre,
-        email: updatedUser.email,
-        rol: updatedUser.rol,
-        token: generateToken(updatedUser._id)
-      });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
+
+    const { nombre, email, telefono, direccion, password, currentPassword } = req.body;
+
+    // Si se va a cambiar la contraseña, exigir la actual
+    if (password) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Debes ingresar tu contraseña actual' });
+      }
+      const ok = await user.matchPassword(currentPassword);
+      if (!ok) {
+        return res.status(401).json({ message: 'La contraseña actual es incorrecta' });
+      }
+      if (typeof password !== 'string' || password.length < 6) {
+        return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres' });
+      }
+      user.password = password;
+    }
+
+    // Cambio de email: verificar que no esté en uso
+    if (email && email.toLowerCase() !== user.email) {
+      const taken = await User.findOne({ email: email.toLowerCase() });
+      if (taken) {
+        return res.status(400).json({ message: 'Ese email ya está registrado' });
+      }
+      user.email = email.toLowerCase();
+    }
+
+    if (typeof nombre === 'string' && nombre.trim()) user.nombre = nombre.trim();
+    if (typeof telefono === 'string') user.telefono = telefono.trim();
+    if (direccion && typeof direccion === 'object') {
+      user.direccion = {
+        calle: direccion.calle ?? user.direccion?.calle,
+        ciudad: direccion.ciudad ?? user.direccion?.ciudad,
+        estado: direccion.estado ?? user.direccion?.estado,
+        codigoPostal: direccion.codigoPostal ?? user.direccion?.codigoPostal,
+      };
+    }
+
+    // El rol NUNCA se cambia por esta ruta (incluso si llega en el body)
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      nombre: updatedUser.nombre,
+      email: updatedUser.email,
+      telefono: updatedUser.telefono,
+      direccion: updatedUser.direccion,
+      rol: updatedUser.rol,
+      token: generateToken(updatedUser._id)
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error del servidor', error: error.message });
   }
