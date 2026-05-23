@@ -26,6 +26,7 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: [true, 'El código postal es requerido']
   },
+  
   telefono: {
     type: String
   },
