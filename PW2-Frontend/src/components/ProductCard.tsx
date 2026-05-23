@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -12,9 +13,11 @@ interface ProductCardProps {
   name: string;
   price: number;
   image: string;
+  precioOferta?: number;
+  rating?: number;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image, precioOferta, rating }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [imageSrc, setImageSrc] = useState(() => resolveProductImage(image));
@@ -23,17 +26,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image }) => 
   useEffect(() => {
     setImageSrc(resolveProductImage(image));
   }, [image]);
-  
-  const discount = Math.floor(Math.random() * 30) + 10;
-  const originalPrice = Math.floor(price * (1 + discount / 100));
-  const rating = (4.2 + Math.random() * 0.7).toFixed(1);
-  
+
+  const hasOffer = typeof precioOferta === 'number' && precioOferta > 0 && precioOferta < price;
+  const displayPrice = hasOffer ? (precioOferta as number) : price;
+  const discount = hasOffer ? Math.round(((price - (precioOferta as number)) / price) * 100) : 0;
+  const ratingValue = typeof rating === 'number' && rating > 0 ? rating : null;
+
   const handleAddToCart = () => {
     addItem({
       id,
       name,
-      price,
-      originalPrice,
+      price: displayPrice,
+      originalPrice: hasOffer ? price : undefined,
       image
     });
   };
@@ -47,11 +51,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image }) => 
       {/* Imagen del producto */}
       <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-primary-50 p-6">
         {/* Badge de descuento */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className="px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-full">
-            -{discount}%
-          </span>
-        </div>
+        {hasOffer ? (
+          <div className="absolute top-4 left-4 z-10">
+            <span className="px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-full">
+              -{discount}%
+            </span>
+          </div>
+        ) : null}
 
         {/* Acciones flotantes */}
         <div className={`absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
@@ -65,48 +71,62 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image }) => 
               <FavoriteBorderIcon className="text-gray-400" fontSize="small" />
             )}
           </button>
-          <button className="p-2.5 bg-white rounded-xl shadow-md hover:shadow-lg hover:bg-primary-50 transition-all duration-300">
+          <Link
+            to={`/producto/${id}`}
+            className="p-2.5 bg-white rounded-xl shadow-md hover:shadow-lg hover:bg-primary-50 transition-all duration-300"
+            title="Ver detalle"
+          >
             <VisibilityOutlinedIcon className="text-gray-400" fontSize="small" />
-          </button>
+          </Link>
         </div>
 
-        <img 
-          src={imageSrc} 
-          alt={name} 
-          onError={() => setImageSrc(PRODUCT_PLACEHOLDER)}
-          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
-        />
+        <Link to={`/producto/${id}`} className="block h-full w-full">
+          <img 
+            src={imageSrc} 
+            alt={name} 
+            onError={() => setImageSrc(PRODUCT_PLACEHOLDER)}
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+          />
+        </Link>
       </div>
 
       {/* Información del producto */}
       <div className="p-5 space-y-3">
         {/* Rating */}
-        <div className="flex items-center gap-1">
-          {[...Array(5)].map((_, i) => (
-            <span 
-              key={i} 
-              className={`text-sm ${i < Math.floor(parseFloat(rating)) ? 'text-amber-400' : 'text-gray-200'}`}
-            >
-              ★
-            </span>
-          ))}
-          <span className="text-xs text-gray-400 ml-1">({rating})</span>
-        </div>
+        {ratingValue !== null ? (
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, i) => (
+              <span
+                key={i}
+                className={`text-sm ${i < Math.floor(ratingValue) ? 'text-amber-400' : 'text-gray-200'}`}
+              >
+                ★
+              </span>
+            ))}
+            <span className="text-xs text-gray-400 ml-1">({ratingValue.toFixed(1)})</span>
+          </div>
+        ) : (
+          <div className="text-xs text-gray-400">Sin reseñas aún</div>
+        )}
 
         {/* Nombre */}
-        <h3 className="font-semibold text-gray-800 line-clamp-1 group-hover:text-primary-600 transition-colors duration-300">
-          {name}
-        </h3>
+        <Link to={`/producto/${id}`} className="block">
+          <h3 className="font-semibold text-gray-800 line-clamp-1 group-hover:text-primary-600 transition-colors duration-300">
+            {name}
+          </h3>
+        </Link>
 
         {/* Precios y botón */}
         <div className="flex items-center justify-between pt-2">
           <div>
             <span className="text-xl font-bold text-gray-900">
-              ${price.toLocaleString()}
+              ${displayPrice.toLocaleString()}
             </span>
-            <span className="text-sm text-gray-400 line-through ml-2">
-              ${originalPrice.toLocaleString()}
-            </span>
+            {hasOffer ? (
+              <span className="text-sm text-gray-400 line-through ml-2">
+                ${price.toLocaleString()}
+              </span>
+            ) : null}
           </div>
           
           <button 

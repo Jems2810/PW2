@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { API_URL } from '../lib/catalog';
 import {
   Phone,
   Email,
@@ -23,6 +24,8 @@ const ContactPage: React.FC = () => {
     subject: '',
     message: ''
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -32,18 +35,34 @@ const ContactPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí manejarías el envío del formulario
-    console.log('Formulario enviado:', formData);
-    alert('¡Gracias por contactarnos! Te responderemos pronto.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
+    setFeedback(null);
+    setSubmitting(true);
+    try {
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: formData.name,
+          email: formData.email,
+          asunto: formData.subject,
+          mensaje: formData.phone
+            ? `${formData.message}\n\nTeléfono de contacto: ${formData.phone}`
+            : formData.message
+        })
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(data?.message || 'No se pudo enviar el mensaje');
+      }
+      setFeedback({ type: 'success', text: '¡Gracias por contactarnos! Te responderemos pronto.' });
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (err) {
+      setFeedback({ type: 'error', text: err instanceof Error ? err.message : 'Error al enviar' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -271,12 +290,21 @@ const ContactPage: React.FC = () => {
                   </div>
                 </div>
 
+                {feedback ? (
+                  <div
+                    className={`rounded-xl border px-4 py-3 text-sm font-medium ${feedback.type === 'success' ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}
+                  >
+                    {feedback.text}
+                  </div>
+                ) : null}
+
                 <button
                   type="submit"
-                  className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/30 transition-all duration-300 flex items-center justify-center space-x-2"
+                  disabled={submitting}
+                  className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/30 transition-all duration-300 flex items-center justify-center space-x-2 disabled:cursor-not-allowed disabled:bg-primary-300"
                 >
                   <Send fontSize="small" />
-                  <span>Enviar Mensaje</span>
+                  <span>{submitting ? 'Enviando...' : 'Enviar Mensaje'}</span>
                 </button>
               </form>
             </div>

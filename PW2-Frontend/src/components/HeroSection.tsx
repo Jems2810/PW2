@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import EastIcon from '@mui/icons-material/East';
 import VerifiedIcon from '@mui/icons-material/Verified';
@@ -6,9 +6,35 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../context/AuthContext';
+import { fetchPublicProducts, resolveProductImage, PRODUCT_PLACEHOLDER, type PublicProduct } from '../lib/catalog';
+
+const formatPrice = (value: number) =>
+  new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(value);
 
 const HeroSection: React.FC = () => {
   const { isAdmin } = useAuth();
+  const [featured, setFeatured] = useState<PublicProduct | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const destacados = await fetchPublicProducts({ destacado: 'true' });
+        const pick = destacados[0] ?? (await fetchPublicProducts())[0] ?? null;
+        if (!cancelled) setFeatured(pick);
+      } catch {
+        if (!cancelled) setFeatured(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const heroImage = featured ? resolveProductImage(featured.imagen) : PRODUCT_PLACEHOLDER;
+  const heroPrice = featured
+    ? (featured.precioOferta && featured.precioOferta < featured.precio ? featured.precioOferta : featured.precio)
+    : null;
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-primary-50 via-white to-amber-50 overflow-hidden">
@@ -46,15 +72,15 @@ const HeroSection: React.FC = () => {
 
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button className="group flex items-center justify-center gap-3 px-8 py-4 bg-primary-500 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-primary-500/30 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300">
+              <Link to="/catalog" className="group flex items-center justify-center gap-3 px-8 py-4 bg-primary-500 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-primary-500/30 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300">
                 Explorar catálogo
                 <EastIcon className="group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
+              </Link>
               
-              <button className="flex items-center justify-center gap-3 px-8 py-4 bg-white text-gray-800 rounded-2xl font-semibold text-lg border-2 border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-300">
+              <Link to="/ofertas" className="flex items-center justify-center gap-3 px-8 py-4 bg-white text-gray-800 rounded-2xl font-semibold text-lg border-2 border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-300">
                 <span className="text-amber-500">🔥</span>
                 Ver ofertas
-              </button>
+              </Link>
 
               {isAdmin ? (
                 <Link
@@ -85,31 +111,48 @@ const HeroSection: React.FC = () => {
           {/* Visual/Imagen */}
           <div className="relative">
             {/* Card principal del teléfono */}
-            <div className="relative z-10 bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-gray-200/50 mx-auto max-w-sm">
+            <Link
+              to={featured ? `/producto/${featured._id}` : '/catalog'}
+              className="relative z-10 mx-auto block max-w-sm rounded-[2.5rem] bg-white p-8 shadow-2xl shadow-gray-200/50 transition hover:-translate-y-1 hover:shadow-2xl"
+            >
               <div className="aspect-[3/4] bg-gradient-to-br from-primary-100 to-primary-50 rounded-3xl flex items-center justify-center">
-                <img 
-                  src="/huawei.png" 
-                  alt="Smartphone destacado" 
-                  className="w-4/5 h-auto drop-shadow-2xl"
+                <img
+                  src={heroImage}
+                  alt={featured?.nombre ?? 'Smartphone destacado'}
+                  className="w-4/5 h-auto object-contain drop-shadow-2xl"
+                  onError={(e) => {
+                    if (!e.currentTarget.src.includes(PRODUCT_PLACEHOLDER)) {
+                      e.currentTarget.src = PRODUCT_PLACEHOLDER;
+                    }
+                  }}
                 />
               </div>
-              
+
               {/* Info flotante */}
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-6 py-3 rounded-2xl shadow-lg border border-gray-100">
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">$41,999</p>
-                    <p className="text-xs text-gray-500">Desde</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {heroPrice !== null ? formatPrice(heroPrice) : '—'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {featured ? featured.marca : 'Desde'}
+                    </p>
                   </div>
                   <div className="w-px h-10 bg-gray-200"></div>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <span key={i} className="text-amber-400 text-lg">★</span>
+                      <span
+                        key={i}
+                        className={`text-lg ${featured && featured.rating && i < Math.round(featured.rating) ? 'text-amber-400' : 'text-gray-200'}`}
+                      >
+                        ★
+                      </span>
                     ))}
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
 
           
           </div>

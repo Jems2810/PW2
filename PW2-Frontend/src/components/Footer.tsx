@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
@@ -13,9 +13,9 @@ import { FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcApplePay } from 'react-icons/
 
 const quickLinks = [
   { name: 'Inicio', href: '/' },
-  { name: 'Catálogo', href: '#' },
-  { name: 'Ofertas', href: '#' },
-  { name: 'Servicios', href: '#' },
+  { name: 'Catálogo', href: '/catalog' },
+  { name: 'Ofertas', href: '/ofertas' },
+  { name: 'Servicios', href: '/servicios' },
   { name: 'Contacto', href: '/contact' }
 ];
 
@@ -28,14 +28,27 @@ const brands = [
 ];
 
 const socialLinks = [
-  { name: 'Facebook', icon: FacebookIcon, color: 'hover:bg-blue-600' },
-  { name: 'Instagram', icon: InstagramIcon, color: 'hover:bg-pink-600' },
-  { name: 'X', icon: XIcon, color: 'hover:bg-gray-700' },
-  { name: 'YouTube', icon: YouTubeIcon, color: 'hover:bg-red-600' }
+  { name: 'Facebook', icon: FacebookIcon, color: 'hover:bg-blue-600', href: 'https://facebook.com/' },
+  { name: 'Instagram', icon: InstagramIcon, color: 'hover:bg-pink-600', href: 'https://instagram.com/' },
+  { name: 'X', icon: XIcon, color: 'hover:bg-gray-700', href: 'https://x.com/' },
+  { name: 'YouTube', icon: YouTubeIcon, color: 'hover:bg-red-600', href: 'https://youtube.com/' }
 ];
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterMsg, setNewsletterMsg] = useState<string | null>(null);
+
+  const handleNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)) {
+      setNewsletterMsg('Ingresa un correo válido');
+      return;
+    }
+    setNewsletterMsg('¡Suscripción registrada! Te enviaremos las próximas ofertas.');
+    setNewsletterEmail('');
+    window.setTimeout(() => setNewsletterMsg(null), 4000);
+  };
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -47,16 +60,27 @@ const Footer: React.FC = () => {
               <h3 className="text-2xl font-bold text-white">Suscríbete a nuestras ofertas</h3>
               <p className="text-primary-100">Recibe las mejores promociones directamente en tu correo</p>
             </div>
-            <div className="flex w-full lg:w-auto">
-              <input
-                type="email"
-                placeholder="tu@email.com"
-                className="flex-1 lg:w-72 px-5 py-3 rounded-l-xl bg-white/20 backdrop-blur text-white placeholder-primary-200 border-0 focus:outline-none focus:ring-2 focus:ring-white"
-              />
-              <button className="px-6 py-3 bg-amber-500 text-white font-semibold rounded-r-xl hover:bg-amber-600 transition-colors duration-300">
-                Suscribir
-              </button>
-            </div>
+            <form onSubmit={handleNewsletter} className="flex w-full lg:w-auto flex-col gap-2">
+              <div className="flex">
+                <input
+                  type="email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  className="flex-1 lg:w-72 px-5 py-3 rounded-l-xl bg-white/20 backdrop-blur text-white placeholder-primary-200 border-0 focus:outline-none focus:ring-2 focus:ring-white"
+                />
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-amber-500 text-white font-semibold rounded-r-xl hover:bg-amber-600 transition-colors duration-300"
+                >
+                  Suscribir
+                </button>
+              </div>
+              {newsletterMsg ? (
+                <p className="text-xs text-white/90 bg-white/10 rounded-lg px-3 py-1.5">{newsletterMsg}</p>
+              ) : null}
+            </form>
           </div>
         </div>
       </div>
@@ -119,12 +143,12 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               {brands.map((brand, i) => (
                 <li key={i}>
-                  <a 
-                    href="#"
+                  <Link
+                    to={`/catalog?marca=${encodeURIComponent(brand.name)}`}
                     className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
                   >
                     {brand.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -137,7 +161,9 @@ const Footer: React.FC = () => {
               {socialLinks.map((social, i) => (
                 <a
                   key={i}
-                  href="#"
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`w-12 h-12 bg-gray-800 ${social.color} rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110`}
                   title={social.name}
                 >
@@ -173,9 +199,9 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
             <p>© {currentYear} MóvilStore. Todos los derechos reservados.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-primary-400 transition-colors">Privacidad</a>
-              <a href="#" className="hover:text-primary-400 transition-colors">Términos</a>
-              <a href="#" className="hover:text-primary-400 transition-colors">Cookies</a>
+              <Link to="/contact" className="hover:text-primary-400 transition-colors">Privacidad</Link>
+              <Link to="/contact" className="hover:text-primary-400 transition-colors">Términos</Link>
+              <Link to="/contact" className="hover:text-primary-400 transition-colors">Cookies</Link>
             </div>
           </div>
         </div>

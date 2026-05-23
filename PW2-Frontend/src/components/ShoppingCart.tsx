@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import type { CartItemId } from '../context/CartContext';
 import { 
@@ -26,7 +27,7 @@ const ShoppingCart: React.FC = () => {
     }
   };
 
-  const shippingCost = state.total > 1000 ? 0 : 99;
+  const shippingCost = state.total > 5000 ? 0 : 150;
   const finalTotal = state.total + shippingCost;
 
   if (state.items.length === 0) {
@@ -46,7 +47,7 @@ const ShoppingCart: React.FC = () => {
                 Agrega algunos productos increíbles a tu carrito
               </p>
               <button className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-primary-500/30">
-                Continuar Comprando
+                <Link to="/catalog" className="text-white">Continuar Comprando</Link>
               </button>
             </div>
           </div>
@@ -217,13 +218,13 @@ const ShoppingCart: React.FC = () => {
               
               {/* Botones de acción */}
               <div className="space-y-2">
-                <button className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-primary-500/30">
+                <Link to="/checkout" className="block w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-xl font-semibold text-center transition-all duration-300 shadow-lg shadow-primary-500/30">
                   Proceder al Pago
-                </button>
+                </Link>
                 
-                <button className="w-full bg-gray-100 text-gray-900 py-2 px-4 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 border border-gray-200">
+                <Link to="/catalog" className="block w-full bg-gray-100 text-gray-900 py-2 px-4 rounded-xl font-semibold text-center hover:bg-gray-200 transition-all duration-300 border border-gray-200">
                   Continuar Comprando
-                </button>
+                </Link>
                 
                 <button 
                   onClick={clearCart}

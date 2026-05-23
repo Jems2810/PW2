@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import type { ReactNode } from 'react';
+
+const CART_STORAGE_KEY = 'pw2_cart_state_v1';
+export const CART_STORAGE_KEY_NAME = CART_STORAGE_KEY;
 
 // Tipos para el carrito
 export type CartItemId = number | string;
@@ -123,9 +126,72 @@ const initialState: CartState = {
   itemCount: 0
 };
 
+const recalculate = (items: CartItem[]): CartState => ({
+  items,
+  total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+  itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+});
+
+const loadInitialState = (): CartState => {
+  if (typeof window === 'undefined') return initialState;
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return initialState;
+    const parsed = JSON.parse(raw) as { items?: unknown };
+    if (!parsed || !Array.isArray(parsed.items)) return initialState;
+
+    const sanitized: CartItem[] = [];
+    for (const entry of parsed.items) {
+      if (!entry || typeof entry !== 'object') continue;
+      const item = entry as Partial<CartItem>;
+      if (
+        (typeof item.id !== 'string' && typeof item.id !== 'number') ||
+        typeof item.name !== 'string' ||
+        typeof item.price !== 'number' ||
+        typeof item.image !== 'string' ||
+        typeof item.quantity !== 'number' ||
+        item.quantity <= 0
+      ) {
+        continue;
+      }
+      sanitized.push({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        originalPrice: typeof item.originalPrice === 'number' ? item.originalPrice : undefined,
+        image: item.image,
+        quantity: Math.floor(item.quantity),
+        color: typeof item.color === 'string' ? item.color : undefined,
+        storage: typeof item.storage === 'string' ? item.storage : undefined,
+      });
+    }
+    return recalculate(sanitized);
+  } catch {
+    return initialState;
+  }
+};
+
 // Provider del contexto
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, undefined, loadInitialState);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        CART_STORAGE_KEY,
+        JSON.stringify({ items: state.items })
+      );
+    } catch {
+      // ignore quota / serialization errors
+    }
+  }, [state.items]);
+
+  // Vaciar el carrito cuando el usuario cierra sesión
+  useEffect(() => {
+    const handleLogout = () => dispatch({ type: 'CLEAR_CART' });
+    window.addEventListener('pw2-auth-logout', handleLogout);
+    return () => window.removeEventListener('pw2-auth-logout', handleLogout);
+  }, []);
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
     dispatch({ type: 'ADD_ITEM', payload: item });

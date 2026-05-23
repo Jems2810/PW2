@@ -9,9 +9,12 @@ export interface PublicProduct {
   modelo: string;
   descripcion: string;
   precio: number;
+  precioOferta?: number;
   imagen: string;
   destacado: boolean;
   activo?: boolean;
+  rating?: number;
+  numReviews?: number;
 }
 
 export const resolveProductImage = (image?: string) => {

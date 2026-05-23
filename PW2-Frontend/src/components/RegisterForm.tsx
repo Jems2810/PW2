@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // Iconos de Material UI
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -16,8 +17,12 @@ import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const RegisterForm: React.FC = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -37,9 +42,42 @@ const RegisterForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Register attempt:', formData);
+    setFeedback(null);
+
+    if (formData.password.length < 6) {
+      setFeedback({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres.' });
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setFeedback({ type: 'error', text: 'Las contraseñas no coinciden.' });
+      return;
+    }
+    if (!formData.acceptTerms) {
+      setFeedback({ type: 'error', text: 'Debes aceptar los términos y condiciones.' });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const nombreCompleto = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
+      await register({
+        nombre: nombreCompleto,
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        telefono: formData.phone.trim() || undefined
+      });
+      setFeedback({ type: 'success', text: 'Cuenta creada con éxito. Redirigiendo...' });
+      navigate('/');
+    } catch (error) {
+      setFeedback({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'No se pudo crear la cuenta'
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -267,12 +305,19 @@ const RegisterForm: React.FC = () => {
             </div>
 
             {/* Botón de registro */}
+            {feedback ? (
+              <div className={`rounded-xl px-4 py-3 text-sm ${feedback.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                {feedback.text}
+              </div>
+            ) : null}
+
             <button
               type="submit"
-              className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 flex items-center justify-center space-x-2"
+              disabled={submitting}
+              className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 flex items-center justify-center space-x-2"
             >
               <PersonAddIcon fontSize="small" />
-              <span>Crear Cuenta</span>
+              <span>{submitting ? 'Creando cuenta...' : 'Crear Cuenta'}</span>
             </button>
           </form>
 

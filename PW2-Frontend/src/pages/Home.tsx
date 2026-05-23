@@ -39,9 +39,7 @@ const Home: React.FC = () => {
   }, []);
 
   const sectionDescription = useMemo(() => {
-    if (products.length > 0) {
-      return 'Estos productos se cargan en tiempo real desde MongoDB por medio de la API pública.';
-    }
+
 
     return 'Descubre los smartphones más populares de nuestra tienda';
   }, [products.length]);
@@ -84,6 +82,8 @@ const Home: React.FC = () => {
                   name={product.nombre}
                   price={product.precio}
                   image={product.imagen}
+                  precioOferta={product.precioOferta}
+                  rating={product.rating}
                 />
               ))}
             </div>
