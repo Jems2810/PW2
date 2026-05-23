@@ -137,6 +137,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, name, price, image, preci
           </button>
         </div>
 
+
         {/* Tags */}
         <div className="flex gap-2 pt-1">
           <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">
