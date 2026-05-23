@@ -1490,7 +1490,7 @@ const AdminPanel: React.FC = () => {
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Módulos del panel</h2>
-              <p className="text-sm text-gray-500">Una sola página, tres dominios de administración y una búsqueda contextual.</p>
+              
             </div>
 
             <div className="w-full max-w-xs">
